@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import scipy
 
 class reader:
-    def __init__(self, window=2, fps=60):
+    def __init__(self, window=2, fps=60, bootSize=(24, 24), wallWidth=30):
         #drg = pyautogui.getWindowsWithTitle("Deep Rock Galactic")[0]
         #box = (0, 0, drg.width-100, drg.height)
         self.cam = dxcam.create(output_idx=window, output_color="BGRA")
@@ -20,10 +20,12 @@ class reader:
         self.gameRegion = np.int32([[700-pad, 137-pad],[1220+pad, 137-pad], [700-pad, 942+pad], [1220+pad, 942+pad]])
         self.gameSize = (self.gameRegion[1][0]-self.gameRegion[0][0], self.gameRegion[2][1]-self.gameRegion[0][1])
 
-        self.wallWidth = 30
+        self.wallWidth = wallWidth
+        if isinstance(bootSize, int): self.bootSize = (bootSize, bootSize)
+        else: self.bootSize = bootSize
 
-        self.g1, self.g2 = np.int32([0, 210, 0, 0]), np.int32([210, 255, 195, 255])
-        self.verticalPlayingBounds = (170, -170)
+        self.g1, self.g2 = np.int32([0, 205, 0, 0]), np.int32([210, 255, 195, 255])
+        self.verticalPlayingBounds = (186, -186)
 
     def start(self):
         self.cam.start(target_fps=self.fps)
@@ -58,18 +60,18 @@ class reader:
         for corner in self.gameRegion:
             cv2.circle(im, tuple(corner), 10, (0, 255, 0), 2)
         return im
-    def drawBoot(self, im, pos):
+    def drawBoot(self, im, pos, color=(30, 120, 255)):
         x, y = pos
-        w, h = 20, 20
-        y = im.shape[1] - y
-        im = cv2.rectangle(im, (x-w//2, y-h//2), (x+w//2, y+h//2), color=(30, 120, 255), thickness=2)
+        x, y = int(x), int(y)
+        w, h = self.bootSize
+        im = cv2.rectangle(im, (x-w//2, y-h//2), (x+w//2, y+h//2), color=color, thickness=2)
     def drawWall(self, im, pos, wallWidth=None):
         ww = self.wallWidth if wallWidth is None else wallWidth
         x, gtop, gbot = pos
         vtop, vbot = self.verticalPlayingBounds
-        pt1 = (int(x-ww/2), gtop+vtop)
-        pt2 = (int(x+ww/2), gbot+vtop)
-        im = cv2.rectangle(im, pt1, pt2, color=(200, 20, 255), thickness=2)
+        pt1 = (int(x-ww/2), int(gtop+vtop))
+        pt2 = (int(x+ww/2), int(gbot+vtop))
+        im = cv2.rectangle(im, pt1, pt2, color=(200, 20, 255), thickness=1)
     def drawWalls(self, im, poss):
         for pos in poss:
             self.drawWall(im, pos)
@@ -78,53 +80,27 @@ class reader:
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, 225, 255, cv2.THRESH_BINARY)[1]
         M = cv2.moments(thresh)
-        w, h = thresh.shape
-        #print("\n", yellow, bold, M, endc)
         try:
             x = int(M["m10"] / M["m00"])
-            y = h - int(M["m01"] / M["m00"])
+            y = int(M["m01"] / M["m00"])
         except:
             return (-1, -1)
         return (x, y)
-    def findWalls(self, im, g1=None, g2=None, returnIm=False, wallWidth=None, gapmin=100, jumpmin=2500):
+    def findWalls(self, im, g1=None, g2=None, returnIm=False, wallWidth=None, gapmin=60, gapmax=250, jumpmin=2800):
         if g1 is None: g1, g2 = self.g1, self.g2
         ww = self.wallWidth if wallWidth is None else wallWidth
         grn = cv2.inRange(im, g1, g2)
         vtop, vbot = self.verticalPlayingBounds
         cols = np.sum(grn[vtop:vbot,:], axis=0)
-        avgs = scipy.ndimage.uniform_filter1d(cols, size=25)
+        avgs = scipy.ndimage.uniform_filter1d(cols, size=35)
         wallx = np.sort(scipy.signal.find_peaks(avgs, prominence=3000)[0])
         
         wallpos = []
         for wx in wallx:
             slc = grn[vtop:vbot,wx-ww//2:wx+ww//2]
             rows = np.sum(slc, axis=1)
-            gtop, gbot = wallBounds(*jumps(rows), xmin=gapmin, ymin=jumpmin)
+            gtop, gbot = wallBounds(*jumps(rows), xmin=gapmin, xmax=gapmax, ymin=jumpmin)
             wallpos.append((wx, gtop, gbot))
-        if returnIm: return wallpos, len(wallx)
-        return wallpos, len(wallx)
+        if returnIm: return wallpos
+        return wallpos
         
-
-cam = reader(fps=60)
-
-a = []
-cam.start()
-for i in (t:=trange(100_000, ncols=80)):
-    t.set_description(blue)
-
-    im = cam.grabGame()
-    
-    pos = cam.bootPos(im)
-    #if i > 350: a.append(pos[1])
-    #print(a)
-
-    poss, num = cam.findWalls(im)
-    
-    cam.drawBoot(im, pos)
-    if len(poss) > 0: cam.drawWalls(im, poss)
-    
-
-    cv2.imshow("drg", im)
-    cv2.waitKey(1)
-    
-    #if i > 350 and num > 2: cv2.waitKey(0)

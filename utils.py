@@ -11,6 +11,7 @@ pink = "\033[38;5;206m"
 orange = "\033[38;5;202m"
 green = "\033[38;5;34m"
 gray = "\033[38;5;8m"
+colors = [purple, blue, cyan, lime, yellow, red, pink, orange, green, gray]
 
 bold = '\033[1m'
 underline = '\033[4m'
@@ -22,7 +23,7 @@ def diff(arr):
     x2 = np.insert(a, 0, 0)
     return x1-x2
 
-def jumps(arr, height=1000, minDist=50):
+def jumps(arr, height=1300, minDist=60):
     d = diff(arr)
     ppeakx, pstatx = scipy.signal.find_peaks(d, height=height, distance=minDist)
     npeakx, pstatx = scipy.signal.find_peaks(-d, height=height, distance=minDist)
@@ -31,14 +32,16 @@ def jumps(arr, height=1000, minDist=50):
     pty = [d[zz] for zz in ptx]
     return ptx, pty
 
-def wallBounds(ptx, pty, xmin=100, ymin=2500):
+def wallBounds(ptx, pty, xmin=100, xmax=250, ymin=3000):
     for i, z in enumerate(zip(ptx[:-1], pty[:-1])):
         x1, y1 = z
         x2, y2 = ptx[i+1], pty[i+1]
         xdiff, ydiff = x2-x1, y2-y1
-        if xdiff >= xmin and ydiff >= ymin:
-            return x1+1, x2-1
-    return (-1, -1)
+
+        if xmax > xdiff > xmin and ydiff > ymin:
+            return x1, x2
+    return -1, -1
+
 
 def imscale(img, s):
     try:
