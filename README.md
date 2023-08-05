@@ -1,5 +1,5 @@
 ## Dalek: the DRG Jetty Boot Bot!
-    Do you love cheating? Want to impress your friends? Well so do I! A recent update for the critically
+Do you love cheating? Want to impress your friends? Well so do I! A recent update for the critically
 acclaimed Deep Rock Galactic added Jetty Boot: a flappy-like which tracks high scores. Perfect for showing
 off! But if you are, like me, somebody who needed a little help putting their money where their mouth is,
 This is the tool for you.  
@@ -8,7 +8,7 @@ try to actually use it, you will find yourself playing with dozens of parameters
 I did not bother to document or systematically tune. You have been warned.]
 
 ### The Script
-    This script uses python3. The screen is grabbed with dxcam and CV2 is used to detect the player's
+This script uses python3. The screen is grabbed with dxcam and CV2 is used to detect the player's
 (boot's) position in the playing area, based on just the image, along with all wall locations and dimensions.  
 The organization of the code is simple, it doesn't take much to understand. the reader class is responsible for
 getting screen images and raw object positions. A game class instance has a reader from which it gets this raw
