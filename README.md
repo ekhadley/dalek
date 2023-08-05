@@ -24,7 +24,7 @@ my testing. If you choose to try and actually use this, you'll likely have to ad
 aspect ratio/color settings.
 
 ### Performance
-    But who really cares about how this crappy code is hacked together? What you want to know is how many points
+But who really cares about how this crappy code is hacked together? What you want to know is how many points
 you can get. The answer is, easily triple digits, and the thousands are within reach. With my current parameter
 settings I don't score below 400. Running it a few times and getting lucky gets me a top score of 640. The two
 main causes of failure are failure in the wall detection, where it recognizes both the correct one and an
