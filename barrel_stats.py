@@ -10,7 +10,7 @@ from tqdm import trange
 # player sinking a barrel, we have 'missed' the cycle. The speed of a hoop can only change when it hits the left wall,
 # not the right, and it can change speed mid cycle (1st bounce).
 # we kick once per cycle. a missed kick resets the phase to 1. a successful kick increments the phase by 1. max phase is 4
-# normal barrels award 10 points per kick. Every 5th barrel is red, and wards 25 base points.
+# normal barrels award 10 points per kick. Every 5th barrel is red, and awards 25 base points.
 # the score of a successul kick is 10*phase for normal barrels, and 25*phase for red barrels.
 
 # happy kicking!
