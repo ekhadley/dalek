@@ -1,7 +1,3 @@
-import cv2, time, pynput, math, numpy as np
-import matplotlib.pyplot as plt
-import capture
-from tqdm import trange
 from utils import *
 
 # The game class defines a state of the game. It should be able to take in

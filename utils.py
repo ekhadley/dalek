@@ -1,4 +1,5 @@
-import cv2, pynput, scipy, numpy as np
+import cv2, capture, scipy, time, pynput, math, numpy as np
+import matplotlib.pyplot as plt
 from tqdm import tgrange
 
 purple = '\033[95m'
